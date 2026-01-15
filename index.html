@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STOCK EXCHANGE MARKET AND INVESTMENT</title>
+<link rel="stylesheet" href="styles.css">
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+<div class="modal" id="authModal">
+  <div class="modal-content">
+    <h2>Login</h2>
+    <input type="email" id="loginEmail" placeholder="Email">
+    <input type="password" id="loginPass" placeholder="Password">
+    <button onclick="loginUser()">Login</button>
+    <p>or</p>
+    <button onclick="showRegister()">Create Account</button>
+    <div id="authError" class="error"></div>
+  </div>
+</div>
+
+<div class="modal" id="registerModal">
+  <div class="modal-content">
+    <h2>Create Account</h2>
+    <input id="fullName" placeholder="Full Name">
+    <input id="address" placeholder="Home Address">
+    <input id="phone" placeholder="Phone Number">
+    <input id="email" placeholder="Email">
+    <input id="dob" type="date" placeholder="Date of Birth">
+    <input id="password" type="password" placeholder="Password">
+    <button onclick="registerUser()">Create Account</button>
+    <div id="regError" class="error"></div>
+  </div>
+</div>
+
+<script src="scripts.js"></script>
+</body>
+</html>
