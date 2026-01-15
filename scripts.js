@@ -126,10 +126,28 @@ function updateWithdrawCountdown(createdAt) {
 }
 
 // ---------- Crypto Prices ----------
-async function updateTicker() {
-  const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd");
-  const data = await res.json();
-  document.getElementById("ticker").innerText = `BTC $${data.bitcoin.usd} | ETH $${data.ethereum.usd}`;
+async function loadPrices() {
+  try {
+    const res = await fetch(
+      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,binancecoin&vs_currencies=usd&include_24hr_change=true"
+    );
+    const d = await res.json();
+
+    tickerContent.innerHTML = `
+      BTC $${d.bitcoin.usd} <span style="color:${d.bitcoin.usd_24h_change>0?'#0f0':'#f00'}">
+      (${d.bitcoin.usd_24h_change.toFixed(2)}%)</span>
+      &nbsp;&nbsp;|&nbsp;&nbsp;
+      ETH $${d.ethereum.usd} <span style="color:${d.ethereum.usd_24h_change>0?'#0f0':'#f00'}">
+      (${d.ethereum.usd_24h_change.toFixed(2)}%)</span>
+      &nbsp;&nbsp;|&nbsp;&nbsp;
+      SOL $${d.solana.usd}
+      &nbsp;&nbsp;|&nbsp;&nbsp;
+      BNB $${d.binancecoin.usd}
+    `;
+  } catch (e) {
+    tickerContent.innerText = "Market data unavailable";
+  }
 }
-setInterval(updateTicker, 30000);
-updateTicker();
+setInterval(loadPrices, 30000);
+loadPrices();
+
