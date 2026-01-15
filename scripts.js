@@ -104,10 +104,30 @@ function investFunds() {
 }
 
 // ---------- Activity Feed ----------
-function renderActivity(log) {
-  const container = document.getElementById("activityFeed");
-  container.innerHTML = log.slice(-10).map(l => `<div>${l}</div>`).join("");
+const activityTypes = [
+  "Deposited $",
+  "Invested $",
+  "Earned interest $65",
+  "Referral bonus $",
+  "Profit credited $"
+];
+
+function addActivity() {
+  const amount = Math.floor(Math.random() * 500 + 20);
+  const type = activityTypes[Math.floor(Math.random() * activityTypes.length)];
+
+  const div = document.createElement("div");
+  div.className = "activity-item";
+  div.innerText = `${type}${amount} • ${new Date().toLocaleTimeString()}`;
+
+  activityFeed.prepend(div);
+
+  if (activityFeed.children.length > 25) {
+    activityFeed.removeChild(activityFeed.lastChild);
+  }
 }
+setInterval(addActivity, 45000);
+
 
 // ---------- Transaction Table ----------
 function renderTransactions(transactions) {
