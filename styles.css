@@ -11,7 +11,49 @@ button{cursor:pointer;transition:0.3s;}
 .top-nav a{padding:8px 14px;margin:3px;border-radius:6px;}
 .top-nav a:hover{background:#2b3139;}
 
-.ticker{background:#0b0e11;border-bottom:1px solid #2b3139;padding:8px;font-size:14px;color:#f0b90b;}
+/* ===== LIVE CRYPTO TICKER ===== */
+.ticker-bar {
+  position: sticky;
+  top: 70px;
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  background: linear-gradient(90deg, #0b0e11, #161a1e);
+  border-bottom: 2px solid #f0b90b;
+  padding: 10px 0;
+  overflow: hidden;
+}
+
+.ticker-label {
+  background: #f0b90b;
+  color: #000;
+  font-weight: 800;
+  padding: 8px 16px;
+  margin-right: 15px;
+  border-radius: 0 8px 8px 0;
+  box-shadow: 0 0 15px rgba(240,185,11,0.6);
+}
+
+.ticker-track {
+  white-space: nowrap;
+  overflow: hidden;
+  flex: 1;
+}
+
+#ticker-content {
+  display: inline-block;
+  padding-left: 100%;
+  animation: tickerScroll 18s linear infinite;
+  font-size: 15px;
+  font-weight: 600;
+  color: #f0b90b;
+}
+
+@keyframes tickerScroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
 
 .container{max-width:1200px;margin:auto;padding:20px;}
 
