@@ -1,0 +1,51 @@
+* {margin:0;padding:0;box-sizing:border-box;}
+body{font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;background:#0b0e11;color:#eaecef;padding-top:70px;}
+a{text-decoration:none;color:#eaecef;}
+button{cursor:pointer;transition:0.3s;}
+
+.top-nav{
+    position:fixed;top:0;left:0;width:100%;background:#161a1e;
+    display:flex;align-items:center;padding:15px 20px;border-bottom:1px solid #2b3139;z-index:1000;flex-wrap:wrap;
+}
+.top-nav h1{color:#f0b90b;font-size:18px;margin-right:20px;}
+.top-nav a{padding:8px 14px;margin:3px;border-radius:6px;}
+.top-nav a:hover{background:#2b3139;}
+
+.ticker{background:#0b0e11;border-bottom:1px solid #2b3139;padding:8px;font-size:14px;color:#f0b90b;}
+
+.container{max-width:1200px;margin:auto;padding:20px;}
+
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);justify-content:center;align-items:center;z-index:2000;}
+.modal-content{background:#161a1e;padding:25px;width:90%;max-width:420px;border-radius:12px;}
+.modal-content input{width:100%;padding:12px;margin:8px 0;background:#0b0e11;border:1px solid #2b3139;color:#fff;border-radius:6px;}
+.modal-content button{width:100%;padding:12px;background:#f0b90b;border:none;font-weight:bold;border-radius:6px;}
+.modal-content button:hover{opacity:.9;}
+.error{color:#ff4d4f;margin-top:10px;}
+.secondary{background:#2b3139;color:#fff;}
+
+.dashboard,.investment,.history,.admin{display:none;}
+
+.card{background:#161a1e;padding:20px;border-radius:12px;margin-bottom:20px;transition:.3s;}
+.card:hover{border:1px solid #f0b90b;}
+
+.balances,.charts{display:flex;gap:15px;margin-bottom:20px;}
+.balance-card{flex:1;text-align:center;}
+.balance-card h3{color:#f0b90b;margin-bottom:5px;}
+.balance-card p{font-size:24px;}
+
+.actions{text-align:center;margin-top:15px;}
+.actions button{padding:10px 20px;margin:5px;background:#f0b90b;border:none;border-radius:6px;}
+
+.activity{max-height:180px;overflow:auto;font-size:14px;}
+.activity div{padding:6px 0;border-bottom:1px solid #2b3139;}
+
+table{width:100%;border-collapse:collapse;}
+th,td{padding:8px;border-bottom:1px solid #2b3139;text-align:left;}
+th{background:#161a1e;color:#f0b90b;}
+
+footer{background:#161a1e;padding:20px;text-align:center;border-top:1px solid #2b3139;}
+
+@media(max-width:768px){
+    .balances,.charts{flex-direction:column;}
+    .top-nav{justify-content:center;}
+}
