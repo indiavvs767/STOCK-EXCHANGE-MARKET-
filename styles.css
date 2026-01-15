@@ -86,8 +86,21 @@ button{cursor:pointer;transition:0.3s;}
 
 .dashboard,.investment,.history,.admin{display:none;}
 
-.card{background:#161a1e;padding:20px;border-radius:12px;margin-bottom:20px;transition:.3s;}
-.card:hover{border:1px solid #f0b90b;}
+.card {
+  background: linear-gradient(180deg, #161a1e, #0b0e11);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #2b3139;
+  transition: all 0.35s ease;
+}
+
+.card:hover {
+  border-color: #f0b90b;
+  box-shadow: 0 0 25px rgba(240,185,11,0.25);
+  transform: translateY(-4px);
+}
+
 
 .balances,.charts{display:flex;gap:15px;margin-bottom:20px;}
 .balance-card{flex:1;text-align:center;}
