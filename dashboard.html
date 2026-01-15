@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard | STOCK EXCHANGE MARKET</title>
+<link rel="stylesheet" href="styles.css">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+<div class="top-nav">
+  <h1>STOCK EXCHANGE MARKET</h1>
+  <a href="#" onclick="showSection('dashboard')">Dashboard</a>
+  <a href="#" onclick="showSection('invest')">Invest</a>
+  <a href="#" onclick="showSection('history')">History</a>
+  <a href="#" onclick="showSection('admin')" id="adminBtn" style="display:none">Admin</a>
+  <a href="#" onclick="logout()">Logout</a>
+</div>
+
+<div class="ticker"><marquee id="ticker">Loading prices...</marquee></div>
+
+<!-- ================= DASHBOARD ================= -->
+<div id="dashboard" class="container">
+  <div class="balances">
+    <div class="card balance-card">
+      <h3>Main Balance</h3>
+      <p id="mainBalance">$0.00</p>
+    </div>
+    <div class="card balance-card">
+      <h3>Profit</h3>
+      <p id="profitBalance">$0.00</p>
+    </div>
+    <div class="card balance-card">
+      <h3>Total</h3>
+      <p id="totalBalance">$0.00</p>
+    </div>
+  </div>
+
+  <div class="charts">
+    <div class="card">
+      <canvas id="balanceChart"></canvas>
+    </div>
+    <div class="card">
+      <canvas id="profitChart"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Withdrawal Status</h3>
+    <p id="withdrawStatus"></p>
+  </div>
+
+  <div class="card">
+    <h3>Live Activity</h3>
+    <div class="activity" id="activityFeed"></div>
+  </div>
+</div>
+
+<!-- ================= INVEST ================= -->
+<div id="invest" class="container">
+  <div class="card">
+    <h3>Investment Plans</h3>
+    <select id="investmentPlan">
+      <option value="gold">Gold - 20%/Week</option>
+      <option value="platinum">Platinum - 25%/Week</option>
+      <option value="diamond">Diamond - 30%/Week</option>
+    </select>
+    <input type="number" id="investAmount" placeholder="Amount">
+    <button onclick="investFunds()">Invest</button>
+  </div>
+</div>
+
+<!-- ================= HISTORY ================= -->
+<div id="history" class="container">
+  <div class="card">
+    <h3>Transactions</h3>
+    <table id="transactionTable">
+      <thead>
+        <tr><th>Date</th><th>Type</th><th>Amount</th><th>Status</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ================= ADMIN ================= -->
+<div id="admin" class="container" style="display:none;">
+  <div class="card">
+    <h3>Admin Monitor</h3>
+    <table id="adminTable">
+      <thead><tr><th>Email</th><th>Name</th><th>Balance</th><th>Profit</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<footer>© 2026 Stock Exchange Market & Investment</footer>
+<script src="scripts.js"></script>
+</body>
+</html>
