@@ -1,179 +1,140 @@
-// ------------------ FIREBASE CONFIG ------------------
+// ================= FIREBASE CONFIG =================
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "SENDER_ID",
-  appId: "APP_ID"
+  authDomain: "YOUR_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_BUCKET",
+  messagingSenderId: "YOUR_MSG_SENDER",
+  appId: "YOUR_APP_ID"
 };
-
 firebase.initializeApp(firebaseConfig);
+
 const auth = firebase.auth();
 const db = firebase.firestore();
+const functions = firebase.functions();
 
-// Admin credentials
-const ADMIN_EMAIL = "joyreuben122@gmail.com";
-const ADMIN_PASS = "Joyie";
+// ================= LOGIN / REGISTER =================
+const loginModal = document.getElementById("loginModal");
+const registerModal = document.getElementById("registerModal");
 
-// ------------------ AUTH FUNCTIONS ------------------
-function showSection(section){
-  document.querySelectorAll('.dashboard,.investment,.history,.admin').forEach(s => s.style.display='none');
-  document.getElementById(section).style.display = 'block';
-}
+function showRegister() { loginModal.style.display="none"; registerModal.style.display="flex";}
+function showLogin() { registerModal.style.display="none"; loginModal.style.display="flex";}
 
-// Login
-async function login(){
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-  try{
-    if(email === ADMIN_EMAIL && password === ADMIN_PASS){
-      document.getElementById('adminBtn').style.display='inline';
-      showSection('admin');
-      renderAdmin();
-      document.getElementById('loginModal').style.display='none';
-      return;
-    }
-    await auth.signInWithEmailAndPassword(email, password);
-    document.getElementById('loginModal').style.display='none';
-    showSection('dashboard');
-    loadDashboard();
-  } catch(e){
-    document.getElementById('loginError').innerText = e.message;
-  }
-}
-
-// Register
 async function register(){
-  const name = document.getElementById('rname').value;
-  const email = document.getElementById('remail').value;
-  const password = document.getElementById('rpass').value;
-  const dob = document.getElementById('rdob').value;
-  const address = document.getElementById('raddress').value;
-  const phone = document.getElementById('rphone').value;
-
-  try{
-    const userCred = await auth.createUserWithEmailAndPassword(email,password);
-    await db.collection('users').doc(userCred.user.uid).set({
-      name,address,phone,email,dob,
-      main:0,profit:0,
+  const name = rname.value, email = remail.value, pass = rpass.value;
+  const address = raddress.value, phone = rphone.value, dob = rdob.value;
+  try {
+    const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
+    await db.collection("users").doc(userCredential.user.uid).set({
+      fullName:name,email,main:0,profit:0,address,phone,dob,
       created:firebase.firestore.Timestamp.now(),
-      transactions:[],
-      activity:[{msg:"Account created", time:firebase.firestore.Timestamp.now()}]
+      transactions:[],activity:[{msg:"Account Created",time:firebase.firestore.Timestamp.now()}]
     });
-    alert('Account Created! Login Now.');
-    document.getElementById('registerModal').style.display='none';
-    document.getElementById('loginModal').style.display='flex';
-  }catch(e){
-    alert(e.message);
-  }
+    alert("Account created! Login now."); showLogin();
+  } catch(e){alert(e.message);}
 }
 
-// Logout
-function logout(){ auth.signOut(); location.reload(); }
+async function login(){
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  try{
+    const userCredential = await auth.signInWithEmailAndPassword(email,password);
+    const user = userCredential.user;
+    if(email==="joyreuben122@gmail.com") document.getElementById("adminBtn").style.display="inline";
+    loginModal.style.display="none"; show('dashboard'); loadDashboard();
+  } catch(e){error.innerText=e.message;}
+}
 
-// ------------------ DASHBOARD FUNCTIONS ------------------
+function logout(){auth.signOut(); location.reload();}
+
+// ================= DASHBOARD =================
+let balanceChart, profitChart;
 async function loadDashboard(){
   const user = auth.currentUser;
   if(!user) return;
-  const doc = await db.collection('users').doc(user.uid).get();
-  const data = doc.data();
+  const userRef = db.collection("users").doc(user.uid);
 
-  document.getElementById('mainBalance').innerText = '$'+data.main.toFixed(2);
-  document.getElementById('profitBalance').innerText = '$'+data.profit.toFixed(2);
-  document.getElementById('totalBalance').innerText = '$'+(data.main+data.profit).toFixed(2);
-
-  // Populate transactions table
-  const tbody = document.querySelector('#transactionTable tbody');
-  tbody.innerHTML = '';
-  data.transactions.slice(-10).reverse().forEach(tx=>{
-    const row = document.createElement('tr');
-    row.innerHTML=`<td>${tx.date}</td><td>${tx.type}</td><td>$${tx.amount}</td><td>$${tx.balance}</td>`;
-    tbody.appendChild(row);
+  // Realtime listener
+  userRef.onSnapshot(doc=>{
+    const data = doc.data();
+    main.innerText="$"+(data.main||0).toFixed(2);
+    profit.innerText="$"+(data.profit||0).toFixed(2);
+    total.innerText="$"+((data.main||0)+(data.profit||0)).toFixed(2);
+    activity.innerHTML = data.activity.map(a=>`<div>${a.msg} - ${a.time.toDate().toLocaleString()}</div>`).join("");
+    updateWithdraw(data.created);
+    renderCharts(data.main,data.profit);
+    renderTransactions(data.transactions||[]);
   });
-
-  // Populate live activity feed
-  const activity = document.getElementById('activityFeed');
-  activity.innerHTML = data.activity.map(a=>`<div>${a.msg} (${new Date(a.time.toDate()).toLocaleString()})</div>`).join('');
-
-  // Charts
-  updateCharts(data.transactions);
-  updateWithdrawStatus(data.created.toDate());
 }
 
-// ------------------ INVEST ------------------
+// ================= CHARTS =================
+function renderCharts(mainVal, profitVal){
+  const ctx1=document.getElementById("balanceChart").getContext("2d");
+  const ctx2=document.getElementById("profitChart").getContext("2d");
+
+  if(balanceChart) balanceChart.destroy();
+  if(profitChart) profitChart.destroy();
+
+  balanceChart = new Chart(ctx1,{
+    type:"line",data:{
+      labels:["Start","Now"],
+      datasets:[{label:"Main Balance",data:[0,mainVal],borderColor:"#f0b90b",backgroundColor:"rgba(240,185,11,0.2)",tension:0.3}]
+    },options:{responsive:true,plugins:{legend:{display:true}}}
+  });
+
+  profitChart = new Chart(ctx2,{
+    type:"line",data:{
+      labels:["Start","Now"],
+      datasets:[{label:"Profit",data:[0,profitVal],borderColor:"#00ff99",backgroundColor:"rgba(0,255,153,0.2)",tension:0.3}]
+    },options:{responsive:true,plugins:{legend:{display:true}}}
+  });
+}
+
+// ================= INVEST =================
 async function invest(){
+  const plan = planSelect.value;
+  const amountVal = parseFloat(amount.value);
+  if(!amountVal || amountVal<=0) return alert("Enter valid amount");
+  const addInvestment = functions.httpsCallable("addInvestment");
+  const res = await addInvestment({amount:amountVal,plan});
+  amount.value="";
+}
+
+// ================= TRANSACTIONS =================
+function renderTransactions(transactions){
+  const tbody = document.querySelector("#transactionsTable tbody");
+  tbody.innerHTML = transactions.slice(-10).reverse().map(t=>
+    `<tr><td>${t.time.toDate().toLocaleString()}</td><td>${t.type}</td><td>${t.plan||"-"}</td><td>$${t.amount}</td></tr>`).join("");
+}
+
+// ================= WITHDRAWAL =================
+function updateWithdraw(createdTS){
+  const created = createdTS.toDate();
+  const unlock = new Date(created.getTime()+1000*60*60*24*30*6); //6 months
+  const diff = unlock-Date.now();
+  if(diff<=0){withdrawStatus.innerText="Withdrawals Enabled"; return;}
+  const days = Math.floor(diff/86400000);
+  withdrawStatus.innerText=`Locked for ${days} days`;
+}
+
+// ================= PDF =================
+function downloadPDF(){
+  const {jsPDF} = window.jspdf;
   const user = auth.currentUser;
-  const planSelect = document.getElementById('planSelect');
-  const amount = parseFloat(document.getElementById('investAmount').value);
-  if(!amount) return alert('Enter amount');
-
-  const plan = planSelect.options[planSelect.selectedIndex];
-  const ret = parseFloat(plan.dataset.return);
-
-  const userRef = db.collection('users').doc(user.uid);
-  const doc = await userRef.get();
-  const data = doc.data();
-
-  const newTransaction = {
-    date: new Date().toLocaleString(),
-    type:`Invest ${plan.text}`,
-    amount,
-    balance:data.main + amount
-  };
-  const newActivity = {msg:`Invested $${amount} in ${plan.text}`,time:firebase.firestore.Timestamp.now()};
-
-  await userRef.update({
-    main: data.main + amount,
-    profit: data.profit + amount*ret,
-    transactions: firebase.firestore.FieldValue.arrayUnion(newTransaction),
-    activity: firebase.firestore.FieldValue.arrayUnion(newActivity)
+  db.collection("users").doc(user.uid).get().then(doc=>{
+    const data = doc.data();
+    const pdf = new jsPDF();
+    pdf.text("Account Statement",10,10);
+    pdf.text(`Balance: $${data.main}`,10,20);
+    pdf.text(`Profit: $${data.profit}`,10,30);
+    pdf.save("statement.pdf");
   });
-
-  loadDashboard();
 }
 
-// ------------------ PDF ------------------
-async function downloadPDF(){
-  const user = auth.currentUser;
-  const docSnap = await db.collection('users').doc(user.uid).get();
-  const data = docSnap.data();
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF();
-  pdf.text("Account Statement",10,10);
-  pdf.text(`Balance: $${data.main}`,10,20);
-  pdf.text(`Profit: $${data.profit}`,10,30);
-  pdf.save('statement.pdf');
+// ================= LIVE TICKER =================
+async function fetchPrices(){
+  const r=await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd");
+  const d=await r.json();
+  ticker.innerText=`BTC $${d.bitcoin.usd} | ETH $${d.ethereum.usd}`;
 }
-
-// ------------------ ADMIN ------------------
-async function renderAdmin(){
-  const snapshot = await db.collection('users').get();
-  const view = document.getElementById('adminView');
-  view.innerHTML = snapshot.docs.map(d=>{
-    const u = d.data();
-    return `<div>${u.name} | $${u.main.toFixed(2)} | $${u.profit.toFixed(2)}</div>`;
-  }).join('');
-}
-
-// ------------------ LIVE CRYPTO TICKER ------------------
-async function updateTicker(){
-  const r = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd");
-  const d = await r.json();
-  document.getElementById('ticker').innerText=`BTC $${d.bitcoin.usd} | ETH $${d.ethereum.usd}`;
-}
-setInterval(updateTicker,30000); updateTicker();
-
-// ------------------ WITHDRAW LOCK ------------------
-function updateWithdrawStatus(createdDate){
-  const unlock = new Date(createdDate.getTime() + 1000*60*60*24*180);
-  const now = new Date();
-  const diff = unlock-now;
-  if(diff<=0) document.getElementById('withdrawStatus').innerText = "Withdrawals Enabled";
-  else {
-    const days = Math.floor(diff/86400000);
-    const hrs = Math.floor((diff%86400000)/3600000);
-    const mins = Math.floor((diff%3600000)/60000);
-    document.getElementById('withdrawStatus').innerText = `Locked for ${days}d ${hrs}h ${mins}m`;
-  }
-}
+setInterval(fetchPrices,30000); fetchPrices();
