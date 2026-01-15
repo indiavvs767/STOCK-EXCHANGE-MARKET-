@@ -11,17 +11,36 @@ button{cursor:pointer;transition:0.3s;}
 .top-nav a{padding:8px 14px;margin:3px;border-radius:6px;}
 .top-nav a:hover{background:#2b3139;}
 
-/* ===== LIVE CRYPTO TICKER ===== */
-.ticker-bar {
-  position: sticky;
-  top: 70px;
-  z-index: 900;
-  display: flex;
-  align-items: center;
-  background: linear-gradient(90deg, #0b0e11, #161a1e);
-  border-bottom: 2px solid #f0b90b;
-  padding: 10px 0;
-  overflow: hidden;
+/* ===== LIVE ACTIVITY FEED ===== */
+.live-activity {
+  border-left: 4px solid #f0b90b;
+}
+
+#activityFeed {
+  max-height: 260px;
+  overflow-y: auto;
+  margin-top: 10px;
+}
+
+.activity-item {
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  background: #0b0e11;
+  border-radius: 8px;
+  border: 1px solid #2b3139;
+  font-size: 14px;
+  animation: fadeSlide 0.4s ease;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.activity-item:hover {
+  background: #161a1e;
+  transform: translateX(4px);
+}
+
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .ticker-label {
